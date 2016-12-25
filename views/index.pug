@@ -1,6 +1,14 @@
-html  
+html
     head
         title RxJs
     body
-    button(id='click-me', type='button') Click Me!
+    div
+        button(id='click-me', type='button') Click Me!
+    div(id='calc-screen') 0
+    table
+        each nums in [[7, 8, 9, '+'], [4, 5, 6, '-'], [1, 2, 3, '*'], [0, '=', '/', 'c']]
+            tr
+                each num in nums
+                    td
+                        button(class='numpad', type='button')=num
     script(src='js/main.js')
