@@ -1,6 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var R = require('ramda'),
     Rx = require('rx'),
     tap = function tap(x) {
@@ -11,18 +13,30 @@ Rx.Observable.fromEvent(document.querySelectorAll('#click-me'), 'click').subscri
     return console.log('You clicked the "' + e.target.innerHTML + '" button!!');
 });
 
+var calculatorSeed = { value: '0' };
 var calculator = function calculator(acc, button) {
     switch (button) {
+        //TODO don't leave any fallthroughs!!!
+        case '+':
+        case '-':
+        case '*':
+        case '/':
         case '=':
             return acc;
+        case 'c':
+            return calculatorSeed;
+        case '.':
+            return _extends({}, acc, {
+                value: acc.value.match(/\./) ? acc.value : acc.value + button
+            });
         default:
-            return acc + button;
+            return _extends({}, acc, {
+                value: R.pipe(R.concat(acc.value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^$/, '0'))(button)
+            });
     }
 };
 
-Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(function (e) {
-    return e.target.innerHTML;
-}).scan(calculator, "").subscribe(function (n) {
+Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.path(['target', 'innerHTML'])).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 
