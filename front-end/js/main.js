@@ -8,7 +8,7 @@ Rx.Observable.fromEvent(
     'click')
         .subscribe(e => console.log(`You clicked the "${e.target.innerHTML}" button!!`))
 
-const calculatorSeed = {value: '0'}
+const calculatorSeed = {value: '0', operation: R.identity }
 const calculator = (acc, button) => {
     switch(button) {
         //TODO don't leave any fallthroughs!!!
@@ -16,10 +16,20 @@ const calculator = (acc, button) => {
         case '-':
         case '*':
         case '/':
+            return {
+                ...acc,
+                value: '0',
+                operation: R.add(acc.value)
+            }
         case '=':
-            return acc
+            return {
+                ...acc,
+                value: acc.operation(acc.value) + '',
+                operation: R.identity
+            }
         case 'c':
             return calculatorSeed
+        //TODO what happens if . is the first button pressed?
         case '.':
             return {
                 ...acc,
@@ -31,6 +41,7 @@ const calculator = (acc, button) => {
                 value: R.pipe(
                     R.concat(acc.value),
                     R.replace(/^(?:0+)?(.*)/, '$1'),
+                    R.replace(/^(?:\.0)+?(.*)/, '0.0$1'),
                     R.replace(/^$/, '0'))
                         (button)
             }

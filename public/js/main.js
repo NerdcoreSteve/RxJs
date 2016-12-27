@@ -13,7 +13,7 @@ Rx.Observable.fromEvent(document.querySelectorAll('#click-me'), 'click').subscri
     return console.log('You clicked the "' + e.target.innerHTML + '" button!!');
 });
 
-var calculatorSeed = { value: '0' };
+var calculatorSeed = { value: '0', operation: R.identity };
 var calculator = function calculator(acc, button) {
     switch (button) {
         //TODO don't leave any fallthroughs!!!
@@ -21,17 +21,25 @@ var calculator = function calculator(acc, button) {
         case '-':
         case '*':
         case '/':
+            return _extends({}, acc, {
+                value: '0',
+                operation: R.add(acc.value)
+            });
         case '=':
-            return acc;
+            return _extends({}, acc, {
+                value: acc.operation(acc.value) + '',
+                operation: R.identity
+            });
         case 'c':
             return calculatorSeed;
+        //TODO what happens if . is the first button pressed?
         case '.':
             return _extends({}, acc, {
                 value: acc.value.match(/\./) ? acc.value : acc.value + button
             });
         default:
             return _extends({}, acc, {
-                value: R.pipe(R.concat(acc.value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^$/, '0'))(button)
+                value: R.pipe(R.concat(acc.value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^(?:\.0)+?(.*)/, '0.0$1'), R.replace(/^$/, '0'))(button)
             });
     }
 };
