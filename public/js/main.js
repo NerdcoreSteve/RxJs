@@ -13,34 +13,46 @@ Rx.Observable.fromEvent(document.querySelectorAll('#click-me'), 'click').subscri
     return console.log('You clicked the "' + e.target.innerHTML + '" button!!');
 });
 
-var calculatorSeed = { value: '0', operation: R.identity };
+var second = function second(x, y) {
+    return y;
+};
+var calculatorSeed = { prevValue: '0', value: '0', operation: second, newNumber: true };
+//TODO need to deal with floats by turning them into ints because of float weidness
+var operate = function operate(acc) {
+    return acc.operation(parseFloat(acc.prevValue), parseFloat(acc.value)) + '';
+};
+var loadOperate = function loadOperate(acc, operation) {
+    return _extends({}, acc, {
+        newNumber: true,
+        value: operate(acc),
+        operation: operation
+    });
+};
 var calculator = function calculator(acc, button) {
     switch (button) {
-        //TODO don't leave any fallthroughs!!!
         case '+':
+            return loadOperate(acc, R.add);
         case '-':
+            return loadOperate(acc, R.subtract);
         case '*':
+            return loadOperate(acc, R.multiply);
         case '/':
-            return _extends({}, acc, {
-                value: '0',
-                operation: R.add(acc.value)
-            });
+            return loadOperate(acc, R.divide);
         case '=':
-            return _extends({}, acc, {
-                value: acc.operation(acc.value) + '',
-                operation: R.identity
-            });
+            return loadOperate(acc, second);
         case 'c':
             return calculatorSeed;
-        //TODO what happens if . is the first button pressed?
-        case '.':
-            return _extends({}, acc, {
-                value: acc.value.match(/\./) ? acc.value : acc.value + button
-            });
         default:
-            return _extends({}, acc, {
-                value: R.pipe(R.concat(acc.value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^(?:\.0)+?(.*)/, '0.0$1'), R.replace(/^$/, '0'))(button)
+            var newAcc = _extends({}, acc, {
+                newNumber: false,
+                prevValue: acc.newNumber ? acc.value : acc.prevValue,
+                value: R.pipe(function (value) {
+                    return acc.newNumber ? '' : value;
+                }, function (value) {
+                    return button === '.' ? value.match(/\./) ? value : value + button : R.pipe(R.concat(value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^(?:\.)+?(.*)/, '0.$1'), R.replace(/^$/, '0'))(button);
+                })(acc.value)
             });
+            return newAcc;
     }
 };
 

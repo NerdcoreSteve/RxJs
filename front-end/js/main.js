@@ -8,43 +8,51 @@ Rx.Observable.fromEvent(
     'click')
         .subscribe(e => console.log(`You clicked the "${e.target.innerHTML}" button!!`))
 
-const calculatorSeed = {value: '0', operation: R.identity }
+const second = (x, y) => y
+const calculatorSeed = {prevValue: '0', value: '0', operation: second, newNumber: true}
+//TODO need to deal with floats by turning them into ints because of float weidness
+const operate = acc => acc.operation(parseFloat(acc.prevValue), parseFloat(acc.value)) + ''
+const loadOperate = (acc, operation) => ({
+        ...acc,
+        newNumber: true,
+        value: operate(acc),
+        operation
+    })
+//TODO refactor to make nicer
 const calculator = (acc, button) => {
     switch(button) {
-        //TODO don't leave any fallthroughs!!!
         case '+':
+            return loadOperate(acc, R.add)
         case '-':
+            return loadOperate(acc, R.subtract)
         case '*':
+            return loadOperate(acc, R.multiply)
         case '/':
-            return {
-                ...acc,
-                value: '0',
-                operation: R.add(acc.value)
-            }
+            return loadOperate(acc, R.divide)
         case '=':
-            return {
-                ...acc,
-                value: acc.operation(acc.value) + '',
-                operation: R.identity
-            }
+            return loadOperate(acc, second)
         case 'c':
             return calculatorSeed
-        //TODO what happens if . is the first button pressed?
-        case '.':
-            return {
-                ...acc,
-                value: acc.value.match(/\./) ? acc.value : acc.value + button
-            }
         default:
-            return {
+            var newAcc = {
                 ...acc,
-                value: R.pipe(
-                    R.concat(acc.value),
-                    R.replace(/^(?:0+)?(.*)/, '$1'),
-                    R.replace(/^(?:\.0)+?(.*)/, '0.0$1'),
-                    R.replace(/^$/, '0'))
-                        (button)
+                newNumber: false,
+                prevValue: acc.newNumber ? acc.value : acc.prevValue,
+                value:
+                    R.pipe(
+                        value => acc.newNumber ? '' : value,
+                        value =>
+                            button === '.'
+                                ? value.match(/\./) ? value : value + button
+                                : R.pipe(
+                                    R.concat(value),
+                                    R.replace(/^(?:0+)?(.*)/, '$1'),
+                                    R.replace(/^(?:\.)+?(.*)/, '0.$1'),
+                                    R.replace(/^$/, '0'))
+                                        (button))
+                        (acc.value)
             }
+            return newAcc
     }
 }
 
