@@ -13,46 +13,54 @@ Rx.Observable.fromEvent(document.querySelectorAll('#click-me'), 'click').subscri
     return console.log('You clicked the "' + e.target.innerHTML + '" button!!');
 });
 
+//Calculator
 var second = function second(x, y) {
     return y;
 };
-var calculatorSeed = { prevValue: '0', value: '0', operation: second, newNumber: true };
-//TODO need to deal with floats by turning them into ints because of float weidness
+
 var operate = function operate(acc) {
     return acc.operation(parseFloat(acc.prevValue), parseFloat(acc.value)) + '';
 };
-var loadOperate = function loadOperate(acc, operation) {
+
+var operateLoadNextOperator = function operateLoadNextOperator(acc, operation) {
     return _extends({}, acc, {
         newNumber: true,
         value: operate(acc),
         operation: operation
     });
 };
+
+var buildNumber = R.curry(function (digit, number) {
+    return digit === '.' ? number.match(/\./) ? number : number + digit : R.pipe(R.concat(number), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^(?:\.)+?(.*)/, '0.$1'), R.replace(/^$/, '0'))(digit);
+});
+
+var updateValue = function updateValue(button, acc) {
+    return R.pipe(function (value) {
+        return acc.newNumber ? '' : value;
+    }, buildNumber(button))(acc.value);
+};
+
+var calculatorSeed = { prevValue: '0', value: '0', operation: second, newNumber: true };
 var calculator = function calculator(acc, button) {
     switch (button) {
         case '+':
-            return loadOperate(acc, R.add);
+            return operateLoadNextOperator(acc, R.add);
         case '-':
-            return loadOperate(acc, R.subtract);
+            return operateLoadNextOperator(acc, R.subtract);
         case '*':
-            return loadOperate(acc, R.multiply);
+            return operateLoadNextOperator(acc, R.multiply);
         case '/':
-            return loadOperate(acc, R.divide);
+            return operateLoadNextOperator(acc, R.divide);
         case '=':
-            return loadOperate(acc, second);
+            return operateLoadNextOperator(acc, second);
         case 'c':
             return calculatorSeed;
         default:
-            var newAcc = _extends({}, acc, {
+            return _extends({}, acc, {
                 newNumber: false,
                 prevValue: acc.newNumber ? acc.value : acc.prevValue,
-                value: R.pipe(function (value) {
-                    return acc.newNumber ? '' : value;
-                }, function (value) {
-                    return button === '.' ? value.match(/\./) ? value : value + button : R.pipe(R.concat(value), R.replace(/^(?:0+)?(.*)/, '$1'), R.replace(/^(?:\.)+?(.*)/, '0.$1'), R.replace(/^$/, '0'))(button);
-                })(acc.value)
+                value: updateValue(button, acc)
             });
-            return newAcc;
     }
 };
 
