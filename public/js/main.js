@@ -40,7 +40,16 @@ var updateValue = function updateValue(button, acc) {
     }, buildNumber(button))(acc.value);
 };
 
-var calculatorSeed = { prevValue: '0', value: '0', operation: second, newNumber: true };
+var toggleNegative = function toggleNegative(n) {
+    return n === '0' ? n : n.match(/^-.*/) ? n.replace(/^-(.*)/, '$1') : '-' + n;
+};
+
+var calculatorSeed = {
+    prevValue: '0',
+    value: '0',
+    operation: second,
+    newNumber: true
+};
 var calculator = function calculator(acc, button) {
     switch (button) {
         case '+':
@@ -55,6 +64,10 @@ var calculator = function calculator(acc, button) {
             return operateLoadNextOperator(acc, second);
         case 'c':
             return calculatorSeed;
+        case 'p':
+            return _extends({}, acc, {
+                value: toggleNegative(acc.value)
+            });
         default:
             return _extends({}, acc, {
                 newNumber: false,
@@ -64,7 +77,9 @@ var calculator = function calculator(acc, button) {
     }
 };
 
-Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.path(['target', 'innerHTML'])).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
+Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.path(['target', 'innerHTML'])).map(function (button) {
+    return button === '+/-' ? 'p' : button;
+}).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 

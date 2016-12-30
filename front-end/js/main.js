@@ -37,7 +37,20 @@ const updateValue = (button, acc) =>
         buildNumber(button))
             (acc.value)
 
-const calculatorSeed = {prevValue: '0', value: '0', operation: second, newNumber: true}
+const toggleNegative = n =>
+    n === '0'
+        ? n
+        : n.match(/^-.*/)
+            ? n.replace(/^-(.*)/, '$1')
+            : '-' + n
+
+const calculatorSeed = {
+    prevValue: '0',
+    value: '0',
+    operation: second,
+    newNumber: true
+}
+
 const calculator = (acc, button) => {
     switch(button) {
         case '+':
@@ -52,6 +65,11 @@ const calculator = (acc, button) => {
             return operateLoadNextOperator(acc, second)
         case 'c':
             return calculatorSeed
+        case 'p':
+            return {
+                ...acc,
+                value: toggleNegative(acc.value)
+            }
         default:
             return {
                 ...acc,
@@ -66,6 +84,7 @@ Rx.Observable.fromEvent(
     document.querySelectorAll('.numpad'),
     'click')
         .map(R.path(['target', 'innerHTML']))
+        .map(button => button === '+/-' ? 'p' : button)
         .scan(calculator, calculatorSeed)
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
