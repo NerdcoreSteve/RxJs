@@ -1,3 +1,5 @@
+require('whatwg-fetch')
+
 const
     R = require('ramda'),
     Rx = require('rx'),
@@ -110,5 +112,13 @@ Rx.Observable.fromEvent(
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
 
-//Twitch
-
+//XKCD
+/*
+get a click stream from arrows and home
+map that to a stream of urls
+    hard-code latest comic number
+flatmap that to a bunch of ajax calls
+subscribe to that stream and populate img, also add alt-txt as p element
+start with the latest comic
+no longer hard-code latest comic number
+*/

@@ -4,12 +4,14 @@ html
     body
     div
         button(id='click-me', type='button') Click Me!
+
     hr
     div(id='letter-screen')
     table
         tr
             each letter in ['x', 'y', 'z']
                 button(class='letters', type='button')=letter
+
     hr
     div(id='calc-screen') 0
     table
@@ -21,3 +23,9 @@ html
     button(class='numpad', type='button') =
     button(class='numpad', type='button') +/-
     script(src='js/main.js')
+
+    hr
+    img
+    button(class='comic', type='button') <
+    button(class='comic', type='button') <>
+    button(class='comic', type='button') >
