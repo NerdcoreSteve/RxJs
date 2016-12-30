@@ -4,6 +4,13 @@ html
     body
     div
         button(id='click-me', type='button') Click Me!
+    hr
+    div(id='letter-screen')
+    table
+        tr
+            each letter in ['x', 'y', 'z']
+                button(class='letters', type='button')=letter
+    hr
     div(id='calc-screen') 0
     table
         each nums in [[7, 8, 9, '+'], [4, 5, 6, '-'], [1, 2, 3, '*'], [0, '.', 'c', '/']]

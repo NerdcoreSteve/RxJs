@@ -3,10 +3,25 @@ const
     Rx = require('rx'),
     tap = x => { console.log(x); return x }
 
+//Click Me!
 Rx.Observable.fromEvent(
     document.querySelectorAll('#click-me'),
     'click')
         .subscribe(e => console.log(`You clicked the "${e.target.innerHTML}" button!!`))
+
+//Letters
+const letterKeys =
+    Rx.Observable.fromEvent(document, 'keypress')
+        .map(R.prop('key'))
+        .filter(R.pipe(R.match(/^[xyz]$/), R.length))
+
+Rx.Observable.fromEvent(
+    document.querySelectorAll('.letters'),
+    'click')
+        .map(R.path(['target', 'innerHTML']))
+        .merge(letterKeys)
+        .scan(R.concat, '')
+        .subscribe(s => document.querySelector('#letter-screen').innerHTML = s)
 
 //Calculator
 const second = (x, y) => y
@@ -94,3 +109,6 @@ Rx.Observable.fromEvent(
         .scan(calculator, calculatorSeed)
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
+
+//Twitch
+

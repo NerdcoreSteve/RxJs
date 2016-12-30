@@ -9,8 +9,16 @@ var R = require('ramda'),
     console.log(x);return x;
 };
 
+//Click Me!
 Rx.Observable.fromEvent(document.querySelectorAll('#click-me'), 'click').subscribe(function (e) {
     return console.log('You clicked the "' + e.target.innerHTML + '" button!!');
+});
+
+//Letters
+var letterKeys = Rx.Observable.fromEvent(document, 'keypress').map(R.prop('key')).filter(R.pipe(R.match(/^[xyz]$/), R.length));
+
+Rx.Observable.fromEvent(document.querySelectorAll('.letters'), 'click').map(R.path(['target', 'innerHTML'])).merge(letterKeys).scan(R.concat, '').subscribe(function (s) {
+    return document.querySelector('#letter-screen').innerHTML = s;
 });
 
 //Calculator
@@ -85,6 +93,8 @@ Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.pat
 }).merge(calculatorKeys).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
     return document.querySelector('#calc-screen').innerHTML = n;
 });
+
+//Twitch
 
 },{"ramda":2,"rx":3}],2:[function(require,module,exports){
 //  Ramda v0.22.1
