@@ -50,6 +50,7 @@ var calculatorSeed = {
     operation: second,
     newNumber: true
 };
+
 var calculator = function calculator(acc, button) {
     switch (button) {
         case '+':
@@ -77,9 +78,11 @@ var calculator = function calculator(acc, button) {
     }
 };
 
+var calculatorKeys = Rx.Observable.fromEvent(document, 'keypress').map(R.prop('key')).filter(R.pipe(R.match(/^[\*\/\+-\dcp=]$/), R.length));
+
 Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.path(['target', 'innerHTML'])).map(function (button) {
     return button === '+/-' ? 'p' : button;
-}).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
+}).merge(calculatorKeys).scan(calculator, calculatorSeed).map(R.prop('value')).subscribe(function (n) {
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 

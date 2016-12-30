@@ -80,11 +80,17 @@ const calculator = (acc, button) => {
     }
 }
 
+const calculatorKeys =
+    Rx.Observable.fromEvent(document, 'keypress')
+        .map(R.prop('key'))
+        .filter(R.pipe(R.match(/^[\*\/\+-\dcp=]$/), R.length))
+
 Rx.Observable.fromEvent(
     document.querySelectorAll('.numpad'),
     'click')
         .map(R.path(['target', 'innerHTML']))
         .map(button => button === '+/-' ? 'p' : button)
+        .merge(calculatorKeys)
         .scan(calculator, calculatorSeed)
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
