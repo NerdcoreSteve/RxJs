@@ -112,13 +112,35 @@ Rx.Observable.fromEvent(
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
 
-//XKCD
-/*
-get a click stream from arrows and home
-map that to a stream of urls
-    hard-code latest comic number
-flatmap that to a bunch of ajax calls
-subscribe to that stream and populate img, also add alt-txt as p element
-start with the latest comic
-no longer hard-code latest comic number
-*/
+const
+    max = 5,
+    min = 1,
+    decFloor = (floor, x) => x - 1 < floor ? x : x - 1,
+    incCeil = (ceil, x) => x + 1 > ceil ? x : x + 1,
+    buttonFunc = (acc, button) => {
+        switch(button) {
+            case '<<':
+                return min
+            case '>>':
+                return max
+            case '<':
+                return decFloor(min, acc)
+            case '>':
+                return incCeil(max, acc)
+            case '<>':
+                return min
+            default:
+                return acc
+        }
+    }
+Rx.Observable.fromEvent(
+    document.querySelectorAll('.story'),
+    'click')
+        .map(R.path(['target', 'innerText']))
+        .scan(buttonFunc, min)
+        .startWith(min)
+        .map(pageNumber => `/story/${pageNumber}`)
+        .flatMap(url => Rx.Observable.fromPromise(fetch(url)))
+        .flatMap(response => response.json())
+        .map(R.prop('text'))
+        .subscribe(text => document.querySelector('#story-screen').innerHTML = text)

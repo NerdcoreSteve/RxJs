@@ -96,16 +96,39 @@ Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.pat
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 
-//XKCD
-/*
-get a click stream from arrows and home
-map that to a stream of urls
-    hard-code latest comic number
-flatmap that to a bunch of ajax calls
-subscribe to that stream and populate img, also add alt-txt as p element
-start with the latest comic
-no longer hard-code latest comic number
-*/
+var max = 5,
+    min = 1,
+    decFloor = function decFloor(floor, x) {
+    return x - 1 < floor ? x : x - 1;
+},
+    incCeil = function incCeil(ceil, x) {
+    return x + 1 > ceil ? x : x + 1;
+},
+    buttonFunc = function buttonFunc(acc, button) {
+    switch (button) {
+        case '<<':
+            return min;
+        case '>>':
+            return max;
+        case '<':
+            return decFloor(min, acc);
+        case '>':
+            return incCeil(max, acc);
+        case '<>':
+            return min;
+        default:
+            return acc;
+    }
+};
+Rx.Observable.fromEvent(document.querySelectorAll('.story'), 'click').map(R.path(['target', 'innerText'])).scan(buttonFunc, min).startWith(min).map(function (pageNumber) {
+    return '/story/' + pageNumber;
+}).flatMap(function (url) {
+    return Rx.Observable.fromPromise(fetch(url));
+}).flatMap(function (response) {
+    return response.json();
+}).map(R.prop('text')).subscribe(function (text) {
+    return document.querySelector('#story-screen').innerHTML = text;
+});
 
 },{"ramda":2,"rx":3,"whatwg-fetch":4}],2:[function(require,module,exports){
 //  Ramda v0.22.1
