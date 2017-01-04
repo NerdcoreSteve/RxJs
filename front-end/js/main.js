@@ -113,7 +113,7 @@ Rx.Observable.fromEvent(
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
 
 const
-    max = 5,
+    max = 6,
     min = 1,
     decFloor = (floor, x) => x - 1 < floor ? x : x - 1,
     incCeil = (ceil, x) => x + 1 > ceil ? x : x + 1,

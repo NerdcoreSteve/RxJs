@@ -96,7 +96,7 @@ Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.pat
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 
-var max = 5,
+var max = 6,
     min = 1,
     decFloor = function decFloor(floor, x) {
     return x - 1 < floor ? x : x - 1;
