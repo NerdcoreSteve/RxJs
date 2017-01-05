@@ -96,6 +96,7 @@ Rx.Observable.fromEvent(document.querySelectorAll('.numpad'), 'click').map(R.pat
     return document.querySelector('#calc-screen').innerHTML = n;
 });
 
+//Story
 var max = 6,
     min = 1,
     decFloor = function decFloor(floor, x) {
@@ -123,12 +124,24 @@ var max = 6,
 Rx.Observable.fromEvent(document.querySelectorAll('.story'), 'click').map(R.path(['target', 'innerText'])).scan(buttonFunc, min).startWith(min).map(function (pageNumber) {
     return '/story/' + pageNumber;
 }).flatMap(function (url) {
-    return Rx.Observable.fromPromise(fetch(url));
+    return fetch(url);
 }).flatMap(function (response) {
     return response.json();
 }).map(R.prop('text')).subscribe(function (text) {
     return document.querySelector('#story-screen').innerHTML = text;
 });
+
+//map vs flatMap or chain
+
+console.log(R.map(function (x) {
+    return [x, x];
+}, [1, 2, 3]));
+// prints [ [ 1, 1 ], [ 2, 2 ], [ 3, 3 ] ]
+
+console.log(R.chain(function (x) {
+    return [x, x];
+}, [1, 2, 3]));
+// prints [ 1, 1, 2, 2, 3, 3 ]
 
 },{"ramda":2,"rx":3,"whatwg-fetch":4}],2:[function(require,module,exports){
 //  Ramda v0.22.1

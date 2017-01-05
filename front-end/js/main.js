@@ -112,6 +112,7 @@ Rx.Observable.fromEvent(
         .map(R.prop('value'))
         .subscribe(n => document.querySelector('#calc-screen').innerHTML = n)
 
+//Story
 const
     max = 6,
     min = 1,
@@ -140,7 +141,17 @@ Rx.Observable.fromEvent(
         .scan(buttonFunc, min)
         .startWith(min)
         .map(pageNumber => `/story/${pageNumber}`)
-        .flatMap(url => Rx.Observable.fromPromise(fetch(url)))
+        .flatMap(url => fetch(url))
         .flatMap(response => response.json())
         .map(R.prop('text'))
         .subscribe(text => document.querySelector('#story-screen').innerHTML = text)
+
+//map vs flatMap or chain
+
+console.log(
+    R.map(x => [x, x], [1, 2, 3]))
+// prints [ [ 1, 1 ], [ 2, 2 ], [ 3, 3 ] ]
+
+console.log(
+    R.chain(x => [x, x], [1, 2, 3]))
+// prints [ 1, 1, 2, 2, 3, 3 ]
